@@ -38,10 +38,8 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install
+      # iOS 使用 SPM (Swift Package Manager)，不需要 CocoaPods
+      # 跳过 pod install 步骤
 
       - name: Build iOS (simulator)
         run: |
@@ -88,6 +86,6 @@ jobs:
       - name: Upload iOS build info
         if: always()
         run: |
-          echo "iOS 构建完成"
+          echo "iOS 模拟器版本构建完成"
           echo "注意：真机 IPA 需要配置 Apple 开发者账号和证书"
           echo "请查看 README 了解如何配置"
