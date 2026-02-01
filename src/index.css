@@ -1,68 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Scholar Search - WebView App */
+/* This app loads Web of Science directly in a native WebView */
 
-@layer base {
-  :root {
-    --background: 220 20% 97%;
-    --foreground: 220 30% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 30% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 12%;
-    --primary: 215 95% 45%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 215 25% 92%;
-    --secondary-foreground: 220 30% 12%;
-    --muted: 215 20% 90%;
-    --muted-foreground: 220 15% 40%;
-    --accent: 215 95% 45%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 215 20% 85%;
-    --input: 215 20% 85%;
-    --ring: 215 95% 45%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 220 25% 8%;
-    --foreground: 215 15% 90%;
-    --card: 220 25% 10%;
-    --card-foreground: 215 15% 90%;
-    --popover: 220 25% 10%;
-    --popover-foreground: 215 15% 90%;
-    --primary: 215 90% 55%;
-    --primary-foreground: 220 25% 8%;
-    --secondary: 220 20% 18%;
-    --secondary-foreground: 215 15% 90%;
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 10% 55%;
-    --accent: 215 90% 55%;
-    --accent-foreground: 220 25% 8%;
-    --destructive: 0 60% 45%;
-    --destructive-foreground: 215 15% 90%;
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 215 90% 55%;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-  }
-}
-
-@layer utilities {
-  .safe-area-inset {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
-  }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
