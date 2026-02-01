@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 允许访问 Web of Science 及相关域名 -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">webofscience.com</domain>
+        <domain includeSubdomains="true">clarivate.com</domain>
+    </domain-config>
+    <!-- 允许所有 HTTPS 连接 -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Scholar Search</string>
+    <string name="title_activity_main">Scholar Search</string>
+    <string name="package_name">com.scholarsearch.app</string>
+    <string name="custom_url_scheme">com.scholarsearch.app</string>
+</resources>
