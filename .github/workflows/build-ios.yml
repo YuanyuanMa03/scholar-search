@@ -1,0 +1,94 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build web assets
+        run: pnpm build
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+
+      - name: Build iOS (simulator)
+        run: |
+          npx cap sync ios
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      # 注意：要构建真机 IPA，需要 Apple 开发者账号和证书
+      # 下面是构建真机版本的示例配置（需要配置 secrets）
+
+      # - name: Build iOS IPA (device)
+      #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      #   run: |
+      #     npx cap sync ios
+      #     cd ios/App
+      #     xcodebuild -workspace App.xcworkspace \
+      #       -scheme App \
+      #       -configuration Release \
+      #       -sdk iphoneos \
+      #       -archivePath build/App.xcarchive \
+      #       CODE_SIGN_IDENTITY="${{ secrets.IOS_CODE_SIGN_IDENTITY }}" \
+      #       PROVISIONING_PROFILE_SPECIFIER="${{ secrets.IOS_PROVISIONING_PROFILE }}"
+      #
+      #     xcodebuild -exportArchive \
+      #       -archivePath build/App.xcarchive \
+      #       -exportPath build/export \
+      #       -exportOptionsPlist exportOptions.plist
+
+      # - name: Upload iOS IPA
+      #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: scholar-search-ios
+      #     path: ios/App/App/build/export/*.ipa
+      #     retention-days: 30
+
+      - name: Upload iOS build info
+        if: always()
+        run: |
+          echo "iOS 构建完成"
+          echo "注意：真机 IPA 需要配置 Apple 开发者账号和证书"
+          echo "请查看 README 了解如何配置"

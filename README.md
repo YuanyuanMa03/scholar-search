@@ -15,147 +15,230 @@
 - **React** - 用户界面框架
 - **TypeScript** - 类型安全
 - **Vite** - 构建工具
+- **GitHub Actions** - 自动化构建
 
-## 开发环境要求
+## 快速开始（无需 Android Studio/Xcode）
 
-### Android 开发
-- Android Studio (推荐最新版本)
-- JDK 8 或更高版本
-- Android SDK (API Level 21+)
-- Android 设备或模拟器
+### 使用 GitHub Actions 自动构建（推荐）
 
-### iOS 开发
-- macOS 系统
-- Xcode 14 或更高版本
-- CocoaPods
-- iOS 设备或模拟器 (iOS 12+)
+这是最简单的方式，不需要安装任何开发工具！
 
-## 安装依赖
+1. **创建 GitHub 仓库并推送代码**
+
+```bash
+# 在 GitHub 上创建一个新仓库（例如：scholar-search）
+
+# 添加远程仓库（替换 YOUR_USERNAME 为你的 GitHub 用户名）
+git remote add origin https://github.com/YOUR_USERNAME/scholar-search.git
+
+# 推送代码
+git branch -M main
+git push -u origin main
+```
+
+2. **自动构建**
+
+推送代码后，GitHub Actions 会自动开始构建：
+- Android APK 会自动生成
+- 构建完成后可以在 Actions 页面下载 APK
+
+3. **下载 APK**
+
+- 访问你的仓库页面
+- 点击 "Actions" 标签
+- 选择最新的构建任务
+- 在 "Artifacts" 部分下载 `scholar-search-android.apk`
+
+4. **手动触发构建**
+
+你也可以手动触发构建：
+- 访问仓库的 "Actions" 页面
+- 选择 "Build Android APK" 或 "Build iOS IPA"
+- 点击 "Run workflow" 按钮
+
+### 构建流程说明
+
+```
+代码推送 → GitHub Actions 触发 → 自动构建 → 生成 APK/IPA → 下载安装
+```
+
+## 本地开发（需要开发工具）
+
+如果你有 Android Studio 或 Xcode，可以进行本地开发：
+
+### 安装依赖
 
 ```bash
 pnpm install
 ```
 
-## 开发命令
+### 开发命令
 
-### 网页版开发
 ```bash
+# 网页版开发
 pnpm dev          # 启动开发服务器
 pnpm build        # 构建生产版本
+
+# 移动端开发
+pnpm cap:sync              # 同步配置
+pnpm cap:open:android      # 打开 Android Studio
+pnpm cap:open:ios          # 打开 Xcode
+pnpm android               # 构建并运行 Android
+pnpm ios                   # 构建并运行 iOS
 ```
 
-### 移动端开发
+### 本地构建 Android APK
+
+如果你安装了 JDK 和 Android SDK（不需要 Android Studio）：
 
 ```bash
-# 同步 Capacitor 配置到原生平台
-pnpm cap:sync
-
-# 打开 Android Studio 进行 Android 开发
-pnpm cap:open:android
-
-# 打开 Xcode 进行 iOS 开发 (仅限 macOS)
-pnpm cap:open:ios
-
-# 完整构建并运行 Android 应用
-pnpm android
-
-# 完整构建并运行 iOS 应用 (仅限 macOS)
-pnpm ios
-```
-
-## 构建生产版本
-
-### Android
-
-1. 构建 Web 资源：
-```bash
+# 1. 构建前端资源
 pnpm build
-```
 
-2. 同步到 Android：
-```bash
+# 2. 同步到 Android
 npx cap sync android
+
+# 3. 构建 APK
+cd android
+./gradlew assembleDebug
+
+# APK 位置: android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-3. 在 Android Studio 中打开项目：
+### 本地构建 iOS（需要 macOS）
+
 ```bash
-npx cap open android
-```
-
-4. 在 Android Studio 中构建 APK 或 AAB
-
-### iOS
-
-1. 构建 Web 资源：
-```bash
+# 1. 构建前端资源
 pnpm build
-```
 
-2. 同步到 iOS：
-```bash
+# 2. 同步到 iOS
 npx cap sync ios
+
+# 3. 使用 Xcode 打开项目
+open ios/App/App.xcworkspace
+
+# 4. 在 Xcode 中构建
 ```
 
-3. 在 Xcode 中打开项目：
-```bash
-npx cap open ios
-```
+## GitHub Actions 配置详解
 
-4. 在 Xcode 中构建和归档应用
+### Android 构建流程
+
+`.github/workflows/build-android.yml` 配置了 Android APK 的自动构建：
+
+1. 检出代码
+2. 安装 Node.js 和 pnpm
+3. 安装项目依赖
+4. 构建前端资源
+5. 安装 Java 和 Android SDK
+6. 构建 Android APK
+7. 上传构建产物
+
+### iOS 构建流程
+
+`.github/workflows/build-ios.yml` 配置了 iOS 应用的构建：
+
+- 模拟器版本：自动构建，无需开发者账号
+- 真机版本：需要 Apple 开发者账号和证书（需要额外配置）
+
+### 构建触发条件
+
+构建会在以下情况自动触发：
+- 推送代码到 `main` 或 `master` 分支
+- 创建以 `v` 开头的 tag（如 `v1.0.0`）
+- 创建 Pull Request
+- 手动触发（workflow_dispatch）
 
 ## 配置说明
 
 ### Capacitor 配置 (capacitor.config.ts)
 
-主要配置项：
-- `appId`: 应用唯一标识符
-- `appName`: 应用显示名称
-- `server.url`: WebView 加载的 URL (Web of Science)
-- `server.allowNavigation`: 允许导航的 URL 模式
+```typescript
+const config: CapacitorConfig = {
+  appId: 'com.scholarsearch.app',
+  appName: 'Scholar Search',
+  webDir: 'dist',
+  server: {
+    url: 'https://www.webofscience.com/',
+    allowNavigation: [
+      'https://www.webofscience.com/*',
+      'https://*.webofscience.com/*',
+      'https://*.clarivate.com/*',
+    ],
+  },
+};
+```
 
-### Android 权限
+### 修改配置
 
-应用已配置以下权限：
-- `INTERNET` - 网络访问
-- `ACCESS_NETWORK_STATE` - 网络状态检测
-- `ACCESS_WIFI_STATE` - WiFi 状态检测
+如果你想要修改 WebView 加载的 URL：
 
-### iOS 配置
-
-Info.plist 中已配置：
-- App Transport Security (ATS) 设置
-- 支持的屏幕方向
-- Web of Science 域名例外
+1. 编辑 `capacitor.config.ts`
+2. 修改 `server.url` 和 `server.allowNavigation`
+3. 提交并推送代码，GitHub Actions 会自动重新构建
 
 ## 项目结构
 
 ```
 scholar-search/
-├── android/                # Android 原生项目
-├── ios/                    # iOS 原生项目
-├── src/                    # Web 源代码
-├── dist/                   # 构建输出
-├── capacitor.config.ts     # Capacitor 配置
-├── package.json           # 项目依赖
-└── README.md              # 项目文档
+├── .github/
+│   └── workflows/           # GitHub Actions 配置
+│       ├── build-android.yml
+│       └── build-ios.yml
+├── android/                 # Android 原生项目
+├── ios/                     # iOS 原生项目
+├── src/                     # Web 源代码
+├── dist/                    # 构建输出
+├── capacitor.config.ts      # Capacitor 配置
+└── package.json            # 项目依赖
 ```
 
 ## 常见问题
 
-### Android 构建失败
-- 确保 Android SDK 已正确安装
-- 检查 JDK 版本是否兼容
-- 在 Android Studio 中同步 Gradle
+### Q: APK 构建失败怎么办？
 
-### iOS 构建失败
-- 确保 Xcode 版本符合要求
-- 运行 `pod install` 更新 CocoaPods 依赖
-- 检查开发者证书和配置文件
+A: 检查 GitHub Actions 的构建日志，常见问题：
+- 依赖安装失败：等待几分钟重试
+- Gradle 构建超时：可能是网络问题，重试即可
 
-### WebView 无法加载页面
-- 检查网络连接
-- 确认 capacitor.config.ts 中的 URL 配置正确
-- 查看原生平台日志获取错误信息
+### Q: 如何获取 iOS 真机版 IPA？
+
+A: 需要配置 Apple 开发者账号：
+1. 在 GitHub 仓库设置中添加 secrets：
+   - `IOS_CODE_SIGN_IDENTITY`: 你的签名证书
+   - `IOS_PROVISIONING_PROFILE`: Provisioning Profile
+2. 取消 `build-ios.yml` 中相关代码的注释
+3. 重新触发构建
+
+### Q: WebView 无法加载页面？
+
+A: 检查以下几点：
+- 确认网络连接正常
+- 检查 `capacitor.config.ts` 中的 URL 配置
+- 查看 GitHub Actions 构建日志
+
+### Q: 如何更新应用？
+
+A: 只需：
+1. 修改代码
+2. 推送到 GitHub
+3. GitHub Actions 自动构建新版本
+4. 下载新的 APK 安装
+
+## 安装 APK 到手机
+
+### Android
+
+1. 下载 APK 文件
+2. 在手机上启用"允许安装未知来源应用"
+3. 打开 APK 文件并安装
+
+### iOS
+
+模拟器版无法在真机上运行。真机版需要：
+1. Apple 开发者账号
+2. 配置签名和证书
+3. 通过 TestFlight 或直接分发
 
 ## 许可证
 
@@ -164,4 +247,5 @@ scholar-search/
 ## 相关链接
 
 - [Capacitor 官方文档](https://capacitorjs.com/)
+- [GitHub Actions 文档](https://docs.github.com/en/actions)
 - [Web of Science 官网](https://www.webofscience.com/)
